@@ -7,13 +7,20 @@ import threading
 api_clients_count = 0
 api_produits_count = 0
 api_commandes_count = 0
+log_messages = []  # Global list to store log messages
 
 def log_message(text_area, message):
+    log_messages.append(message)
     if "40" in message:
         text_area.insert(tk.END, message + "\n", "red")
     else:
         text_area.insert(tk.END, message + "\n")
     text_area.yview(tk.END)  # Auto-scroll to the end
+
+def save_logs_to_file(filename='log_messages.txt'):
+    with open(filename, 'w', encoding='utf-8') as file:
+        for message in log_messages:
+            file.write(message + '\n')
 
 def main(text_area):
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -66,10 +73,17 @@ if __name__ == '__main__':
 
     start_consumer_thread(text_area)
 
+    def on_closing():
+        save_logs_to_file()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+
     try:
         root.mainloop()
     except KeyboardInterrupt:
         print('Interrupted')
+        save_logs_to_file()
         try:
             sys.exit(0)
         except SystemExit:
