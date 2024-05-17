@@ -2,6 +2,9 @@ import pika, sys, os
 from datetime import datetime
 
 api_clients_count=0
+api_produits_count=0
+api_commandes_count=0
+
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
