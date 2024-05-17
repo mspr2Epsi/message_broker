@@ -10,16 +10,32 @@ def main():
     channel = connection.channel()
 
     channel.queue_declare(queue='message_broker_client')
+    channel.queue_declare(queue='message_broker_produit')
+    channel.queue_declare(queue='message_broker_commande')
 
-    def callback(ch, method, properties, body):
+    def callback_client(ch, method, properties, body):
         global api_clients_count 
         api_clients_count+=1
         print(f" Nombre d’appel à l’API client  {api_clients_count}")
         print(f" [x] {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Message reçu {body}")
 
-    channel.basic_consume(queue='message_broker_client', on_message_callback=callback, auto_ack=True)
+    def callback_produit(ch, method, properties, body):
+        global api_produits_count 
+        api_produits_count+=1
+        print(f" Nombre d’appel à l’API produit  {api_produits_count}")
+        print(f" [x] {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Message reçu {body}")     
 
-    print(' [*] Waiting for messages. To exit press CTRL+C')
+    def callback_commande(ch, method, properties, body):
+        global api_commandes_count 
+        api_commandes_count+=1
+        print(f" Nombre d’appel à l’API commandes  {api_commandes_count}")
+        print(f" [x] {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Message reçu {body}")                   
+
+    channel.basic_consume(queue='message_broker_client', on_message_callback=callback_client, auto_ack=True)
+    channel.basic_consume(queue='message_broker_produit',on_message_callback=callback_produit, auto_ack=True)
+    channel.basic_consume(queue='message_broker_commande',on_message_callback=callback_commande, auto_ack=True)
+
+    print('Message broker en attente de message')
     channel.start_consuming()
 
 if __name__ == '__main__':
